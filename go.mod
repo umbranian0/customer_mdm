@@ -1,4 +1,4 @@
-module github.com/v/customer-mdm
+module github.com/umbranian0/customer-mdm
 
 go 1.22
 
