@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package customer.v1;
-option go_package = "github.com/stricker/customer-mdm/api/gen/customer/v1;customerv1";
+option go_package = "github.com/umbranian0/customer-mdm/api/gen/customer/v1;customerv1";
 
 import "google/protobuf/timestamp.proto";
 

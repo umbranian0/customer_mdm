@@ -1,4 +1,4 @@
-module github.com/stricker/customer-mdm
+module github.com/v/customer-mdm
 
 go 1.22
 
@@ -9,4 +9,4 @@ require (
     google.golang.org/protobuf v1.33.0
 )
 
-replace github.com/stricker/customer-mdm => ./
+replace github.com/umbranian0/customer-mdm => ./
