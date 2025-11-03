@@ -1,0 +1,9 @@
+server:
+  grpc_addr: ":8080"
+
+db:
+  dsn: "postgres://mdm:mdm@localhost:5432/mdm?sslmode=disable"
+
+kafka:
+  brokers: "localhost:9094"
+  outbox_topic: "mdm.customer.events.v1"

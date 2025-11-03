@@ -1,0 +1,10 @@
+version: v1
+name: buf.build/yourorg/customer-mdm
+deps:
+  - buf.build/google/protobuf
+breaking:
+  use:
+    - FILE
+lint:
+  use:
+    - DEFAULT

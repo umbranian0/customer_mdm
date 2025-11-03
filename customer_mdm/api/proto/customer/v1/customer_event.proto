@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package customer.v1;
+option go_package = "github.com/stricker/customer-mdm/api/gen/customer/v1;customerv1";
+
+import "google/protobuf/timestamp.proto";
+import "api/proto/customer/v1/customer.proto";
+
+message CustomerEvent {
+  string event_id = 1;
+  string aggregate_id = 2;
+  string event_type = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+  string source = 5;
+  string trace_id = 6;
+  string schema_version = 7;
+
+  oneof data {
+    CustomerCreated created = 10;
+    CustomerUpdated updated = 11;
+    CustomerDeleted deleted = 12;
+  }
+}
+
+message CustomerCreated { Customer after = 1; }
+message CustomerUpdated {
+  Customer before = 1;
+  Customer after  = 2;
+  repeated string changed_fields = 3;
+}
+message CustomerDeleted { Customer before = 1; }

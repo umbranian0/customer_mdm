@@ -1,0 +1,19 @@
+# build artifacts
+bin/
+dist/
+*.exe
+*.out
+
+# IDE
+.vscode/
+.idea/
+
+# Go
+vendor/
+go.sum
+
+# Generated protobufs
+api/gen/
+
+# local env
+.env

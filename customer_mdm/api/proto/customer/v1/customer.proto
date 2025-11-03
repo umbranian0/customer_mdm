@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package customer.v1;
+option go_package = "github.com/stricker/customer-mdm/api/gen/customer/v1;customerv1";
+
+import "google/protobuf/timestamp.proto";
+
+message Customer {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string tax_id = 4;
+  string phone = 5;
+  string country = 6;
+  bool   is_active = 7;
+  map<string,string> attributes = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message CustomerInput {
+  string name = 1;
+  string email = 2;
+  string tax_id = 3;
+  string phone = 4;
+  string country = 5;
+  bool   is_active = 6;
+  map<string,string> attributes = 7;
+}
+
+message PageRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  string query = 3;
+}
+message PageResponse {
+  string next_page_token = 1;
+  int32 total_size = 2;
+}
+
+message CreateCustomerRequest {
+  CustomerInput input = 1;
+  string idempotency_key = 2;
+}
+message CreateCustomerResponse { Customer customer = 1; }
+
+message GetCustomerRequest { string id = 1; }
+message GetCustomerResponse { Customer customer = 1; }
+
+message UpdateCustomerRequest {
+  string id = 1;
+  CustomerInput input = 2;
+}
+message UpdateCustomerResponse { Customer customer = 1; }
+
+message DeleteCustomerRequest { string id = 1; }
+message DeleteCustomerResponse { bool deleted = 1; }
+
+message ListCustomersRequest { PageRequest page = 1; }
+message ListCustomersResponse {
+  repeated Customer customers = 1;
+  PageResponse page = 2;
+}
+
+service CustomerService {
+  rpc CreateCustomer (CreateCustomerRequest) returns (CreateCustomerResponse);
+  rpc GetCustomer    (GetCustomerRequest)    returns (GetCustomerResponse);
+  rpc UpdateCustomer (UpdateCustomerRequest) returns (UpdateCustomerResponse);
+  rpc DeleteCustomer (DeleteCustomerRequest) returns (DeleteCustomerResponse);
+  rpc ListCustomers  (ListCustomersRequest)  returns (ListCustomersResponse);
+}
