@@ -4,8 +4,8 @@ import (
     "context"
     "time"
 
-    "github.com/yourorg/customer-mdm/internal/ports"
-    customerv1 "github.com/yourorg/customer-mdm/api/gen/customer/v1"
+    "github.com/umbranian0/customer-mdm/internal/ports"
+    customerv1 "github.com/umbranian0/customer-mdm/api/gen/customer/v1"
     "google.golang.org/protobuf/types/known/timestamppb"
     "google.golang.org/protobuf/proto"
 )

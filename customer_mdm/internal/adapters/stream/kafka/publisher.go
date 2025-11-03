@@ -2,7 +2,7 @@ package kafka
 
 import (
     "context"
-    "github.com/yourorg/customer-mdm/internal/ports"
+    "github.com/umbranian0/customer-mdm/internal/ports"
     "github.com/segmentio/kafka-go"
 )
 

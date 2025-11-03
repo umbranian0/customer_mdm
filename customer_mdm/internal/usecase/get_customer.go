@@ -2,8 +2,8 @@ package usecase
 
 import (
     "context"
-    "github.com/yourorg/customer-mdm/internal/domain"
-    "github.com/yourorg/customer-mdm/internal/ports"
+    "github.com/umbranian0/customer-mdm/internal/domain"
+    "github.com/umbranian0/customer-mdm/internal/ports"
 )
 
 type GetCustomer struct { Repo ports.CustomerRepository }
