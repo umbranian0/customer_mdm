@@ -4,7 +4,7 @@ package customer.v1;
 option go_package = "github.com/umbranian0/customer-mdm/api/gen/customer/v1;customerv1";
 
 import "google/protobuf/timestamp.proto";
-import "api/proto/customer/v1/customer.proto";
+import "customer/v1/customer.proto";
 
 message CustomerEvent {
   string event_id = 1;
