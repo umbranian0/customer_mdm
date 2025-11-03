@@ -1,5 +1,5 @@
 version: v1
-name: buf.build/yourorg/customer-mdm
+name: buf.build/umbranian0/customer-mdm
 deps:
   - buf.build/google/protobuf
 breaking:

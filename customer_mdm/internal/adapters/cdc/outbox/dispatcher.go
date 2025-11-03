@@ -6,7 +6,7 @@ import (
 
     "github.com/jackc/pgx/v5"
     "github.com/jackc/pgx/v5/pgxpool"
-    "github.com/yourorg/customer-mdm/internal/ports"
+    "github.com/umbranian0/customer-mdm/internal/ports"
 )
 
 type Dispatcher struct {

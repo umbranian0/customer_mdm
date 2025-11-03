@@ -6,7 +6,7 @@ import (
     "net"
     "time"
 
-    "github.com/yourorg/customer-mdm/internal/app"
+    "github.com/umbranian0/customer-mdm/internal/app"
 )
 
 func main() {
