@@ -37,7 +37,7 @@ func loadConfig() Config {
 		OutboxTopic:  os.Getenv("OUTBOX_TOPIC"),
 	}
 	if cfg.DB_DSN == "" {
-		cfg.DB_DSN = "postgres://mdm:mdm@localhost:5432/mdm?sslmode=disable"
+		cfg.DB_DSN = "postgres://mdm:mdm@127.0.0.1:6431/mdm?sslmode=disable"
 	}
 	if cfg.KafkaBrokers == "" {
 		cfg.KafkaBrokers = "localhost:9094"
