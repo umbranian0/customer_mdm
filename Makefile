@@ -3,7 +3,7 @@ GEN_DIR=api/gen
 
 .PHONY: proto
 proto:
-	buf generate
+	docker run --rm -v "$(Get-Location):/workspace" -w /workspace bufbuild/buf:latest generate
 
 .PHONY: run
 run:

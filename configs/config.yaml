@@ -2,7 +2,7 @@ server:
   grpc_addr: ":8080"
 
 db:
-  dsn: "postgres://mdm:mdm@localhost:5432/mdm?sslmode=disable"
+  dsn: "jdbc:postgres://mdm:mdm@127.0.0.1:6431/mdm?sslmode=disable"
 
 kafka:
   brokers: "localhost:9094"

@@ -110,8 +110,9 @@ func (s *CustomerServer) ListCustomers(ctx context.Context, req *customerv1.List
 	return res, nil
 }
 
-var _ ports.EventPublisher = (*dummyPublisher)(nil)
+// DummyPublisher is a no-op EventPublisher used in wiring for local runs.
+var _ ports.EventPublisher = (*DummyPublisher)(nil)
 
-type dummyPublisher struct{}
+type DummyPublisher struct{}
 
-func (d *dummyPublisher) Publish(ctx context.Context, ev ports.Event) error { return nil }
+func (d *DummyPublisher) Publish(ctx context.Context, ev ports.Event) error { return nil }
