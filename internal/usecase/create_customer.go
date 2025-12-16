@@ -55,7 +55,10 @@ func (uc *CreateCustomer) Run(ctx context.Context, in CreateCustomerInput) (*dom
 			}}},
 		}
 		payload, _ := proto.Marshal(ev)
-		return uc.Outbox.Write(tx, uc.Topic, []byte(created.ID), payload, nil)
+		return uc.Outbox.Write(tx, uc.Topic, []byte(created.ID), payload, map[string]string{
+			"event_type": ev.EventType,
+			"topic":      uc.Topic,
+		})
 	})
 	if err != nil {
 		return nil, err

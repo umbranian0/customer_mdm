@@ -9,6 +9,10 @@ proto:
 run:
 	go run ./cmd/mdm-service
 
+.PHONY: rest
+rest:
+	go run ./cmd/mdm-rest-gateway
+
 .PHONY: cli
 cli:
 	go run ./cmd/mdm-cli $(ARGS)

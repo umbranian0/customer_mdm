@@ -104,10 +104,20 @@ type OutboxWriter struct {
 func (o *OutboxWriter) Write(tx ports.Tx, topic string, key, value []byte, headers map[string]string) error {
 	const q = `INSERT INTO outbox_events (aggregate_type, aggregate_id, event_type, payload, headers)
                VALUES ($1,$2,$3,$4,$5)`
-	// we expect value is a protobuf CustomerEvent; we parse minimal to get aggregate_id/event_type? For simplicity pass placeholders.
 	aggregateType := "customer"
-	aggregateID := uuid.New().String()
+	aggregateID := uuid.New()
+	if len(key) > 0 {
+		if parsed, err := uuid.Parse(string(key)); err == nil {
+			aggregateID = parsed
+		}
+	}
 	eventType := "generic"
+	if v, ok := headers["event_type"]; ok && v != "" {
+		eventType = v
+	}
+	if headers == nil {
+		headers = map[string]string{}
+	}
 	_, err := o.Pool.Exec(tx.Context(), q, aggregateType, aggregateID, eventType, value, headers)
 	return err
 }

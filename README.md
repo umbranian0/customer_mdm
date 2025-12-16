@@ -49,6 +49,20 @@ Example (using grpcurl after code generation):
 grpcurl -plaintext localhost:8080 list customer.v1.CustomerService
 ```
 
+### Optional: REST gateway (gRPC -> REST adapter)
+Run the lightweight REST adapter if you need JSON/HTTP instead of gRPC:
+```bash
+go run ./cmd/mdm-rest-gateway
+# REST listens on :8090 by default, proxies to gRPC at 127.0.0.1:8080
+# override with REST_ADDR=":8081" GRPC_ADDR="localhost:8080"
+```
+Available endpoints (JSON):
+- `POST /customers` (header `Idempotency-Key` supported)
+- `GET /customers/{id}`
+- `PUT /customers/{id}`
+- `DELETE /customers/{id}`
+- `GET /customers?page_size=50&page_token=...&query=...`
+
 ## Configuration
 See [`configs/config.yaml`](../configs/config.yaml). Override via env vars:
 - `DB_DSN` (e.g., `postgres://mdm:mdm@localhost:5432/mdm?sslmode=disable`)
