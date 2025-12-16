@@ -5,11 +5,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	customerv1 "github.com/umbranian0/customer-mdm/api/gen/customer/v1"
 	"github.com/umbranian0/customer-mdm/internal/domain"
+	"github.com/umbranian0/customer-mdm/internal/events"
 	"github.com/umbranian0/customer-mdm/internal/ports"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type CreateCustomerInput struct {
@@ -40,25 +38,8 @@ func (uc *CreateCustomer) Run(ctx context.Context, in CreateCustomerInput) (*dom
 			return err
 		}
 
-		ev := &customerv1.CustomerEvent{
-			EventId:       uuid.New().String(),
-			AggregateId:   created.ID,
-			EventType:     "CustomerCreated",
-			OccurredAt:    timestamppb.New(now),
-			Source:        "customer-mdm/1.0.0",
-			SchemaVersion: "v1",
-			Data: &customerv1.CustomerEvent_Created{Created: &customerv1.CustomerCreated{After: &customerv1.Customer{
-				Id:   created.ID,
-				Name: created.Name, Email: created.Email, TaxId: created.TaxID, Phone: created.Phone,
-				Country: created.Country, IsActive: created.IsActive, Attributes: created.Attributes,
-				CreatedAt: timestamppb.New(created.CreatedAt), UpdatedAt: timestamppb.New(created.UpdatedAt),
-			}}},
-		}
-		payload, _ := proto.Marshal(ev)
-		return uc.Outbox.Write(tx, uc.Topic, []byte(created.ID), payload, map[string]string{
-			"event_type": ev.EventType,
-			"topic":      uc.Topic,
-		})
+		payload, headers, _ := events.BuildCreated(uc.Topic, created, "customer-mdm/1.0.0")
+		return uc.Outbox.Write(tx, uc.Topic, []byte(created.ID), payload, headers)
 	})
 	if err != nil {
 		return nil, err

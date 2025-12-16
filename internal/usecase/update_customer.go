@@ -4,11 +4,9 @@ import (
 	"context"
 	"time"
 
-	customerv1 "github.com/umbranian0/customer-mdm/api/gen/customer/v1"
 	"github.com/umbranian0/customer-mdm/internal/domain"
+	"github.com/umbranian0/customer-mdm/internal/events"
 	"github.com/umbranian0/customer-mdm/internal/ports"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type UpdateCustomerInput struct {
@@ -48,25 +46,9 @@ func (uc *UpdateCustomer) Run(ctx context.Context, in UpdateCustomerInput) (*dom
 			return err
 		}
 
-		ev := &customerv1.CustomerEvent{
-			EventId:       in.ID,
-			AggregateId:   in.ID,
-			EventType:     "CustomerUpdated",
-			OccurredAt:    timestamppb.Now(),
-			Source:        "customer-mdm/1.0.0",
-			SchemaVersion: "v1",
-			Data: &customerv1.CustomerEvent_Updated{Updated: &customerv1.CustomerUpdated{
-				After: &customerv1.Customer{
-					Id: before.ID, Name: before.Name, Email: before.Email, TaxId: before.TaxID,
-					Phone: before.Phone, Country: before.Country, IsActive: before.IsActive,
-					Attributes: before.Attributes,
-					CreatedAt:  timestamppb.New(before.CreatedAt), UpdatedAt: timestamppb.New(before.UpdatedAt),
-				},
-			}},
-		}
-		payload, _ := proto.Marshal(ev)
 		updated = before
-		return uc.Outbox.Write(tx, uc.Topic, []byte(before.ID), payload, nil)
+		payload, headers, _ := events.BuildUpdated(uc.Topic, before, "customer-mdm/1.0.0")
+		return uc.Outbox.Write(tx, uc.Topic, []byte(before.ID), payload, headers)
 	})
 	return updated, err
 }

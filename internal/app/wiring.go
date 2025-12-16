@@ -14,6 +14,7 @@ import (
 	customerv1 "github.com/umbranian0/customer-mdm/api/gen/customer/v1"
 	outbox "github.com/umbranian0/customer-mdm/internal/adapters/cdc/outbox"
 	pg "github.com/umbranian0/customer-mdm/internal/adapters/db/postgres"
+	kafkapub "github.com/umbranian0/customer-mdm/internal/adapters/stream/kafka"
 	grpcadp "github.com/umbranian0/customer-mdm/internal/adapters/transport/grpc"
 	"github.com/umbranian0/customer-mdm/internal/usecase"
 )
@@ -99,9 +100,11 @@ func Initialize(ctx context.Context) *Container {
 	}
 	customerv1.RegisterCustomerServiceServer(srv, custSrv)
 
+	publisher := kafkapub.NewPublisher(cfg.KafkaBrokers)
+
 	dispatcher := &outbox.Dispatcher{
 		Pool:      pool,
-		Publisher: &grpcadp.DummyPublisher{}, // swap to real Kafka in cmd main
+		Publisher: publisher,
 		BatchSize: 100,
 		PollEvery: 2 * time.Second,
 		Topic:     cfg.OutboxTopic,

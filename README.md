@@ -19,7 +19,7 @@ This is a runnable skeleton for a **Customer MDM backend** using:
 ```bash
 cd deploy
 docker compose up -d
-# Postgres on localhost:5432  (user: mdm / pass: mdm / db: mdm)
+# Postgres on localhost:6431  (user: mdm / pass: mdm / db: mdm)
 # Kafka on localhost:9094 (PLAINTEXT)
 ```
 
