@@ -5,7 +5,7 @@ This is a runnable skeleton for a **Customer MDM backend** using:
 - **Clean Architecture** (domain, ports, adapters, usecases)
 - **Postgres** (pgx) with **Transactional Outbox** for CDC
 - **Kafka** publisher for domain events
-- A minimal **docker-compose** for Postgres + Kafka (KRaft mode)
+- A minimal **docker-compose** for Postgres + Debezium (Kafka runs externally)
 
 ## Quick start
 
@@ -20,8 +20,9 @@ This is a runnable skeleton for a **Customer MDM backend** using:
 cd deploy
 docker compose up -d
 # Postgres on localhost:6431  (user: mdm / pass: mdm / db: mdm)
-# Kafka on localhost:9094 (PLAINTEXT)
+# Debezium Connect on localhost:8083 (for CDC outbox), pointing to external Kafka at 192.168.210.197:9092
 ```
+> Default broker config points to `192.168.210.197:9092`. Override `KAFKA_BROKERS` to use a different Kafka endpoint.
 
 ### 2) Generate gRPC code
 ```bash
@@ -63,11 +64,22 @@ Available endpoints (JSON):
 - `DELETE /customers/{id}`
 - `GET /customers?page_size=50&page_token=...&query=...`
 
+### Debezium outbox connector
+An outbox-style CDC connector is provided to stream `outbox_events` via Debezium. Start the stack, then register the connector:
+```bash
+cd deploy
+docker compose up -d
+curl -X POST -H "Content-Type: application/json" \
+     --data @debezium-connector.json \
+     http://localhost:8083/connectors
+```
+This routes events by `aggregate_type` to topics like `outbox.customer`.
+
 ## Configuration
 See [`configs/config.yaml`](../configs/config.yaml). Override via env vars:
 - `DB_DSN` (e.g., `postgres://mdm:mdm@localhost:5432/mdm?sslmode=disable`)
-- `KAFKA_BROKERS` (e.g., `localhost:9094`)
-- `OUTBOX_TOPIC` (default `mdm.customer.events.v1`)
+- `KAFKA_BROKERS` (e.g., `192.168.210.197:9092`)
+- `OUTBOX_TOPIC` (default `stricker-customers`)
 
 ## Notes
 - This skeleton writes events to `outbox_events` in the same transaction as the CRUD change.

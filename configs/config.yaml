@@ -5,5 +5,5 @@ db:
   dsn: "jdbc:postgres://mdm:mdm@127.0.0.1:6431/mdm?sslmode=disable"
 
 kafka:
-  brokers: "localhost:9094"
-  outbox_topic: "mdm.customer.events.v1"
+  brokers: "192.168.210.197:9092"
+  outbox_topic: "stricker-customers"

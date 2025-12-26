@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 	"sync"
 
 	"github.com/segmentio/kafka-go"
@@ -13,14 +12,14 @@ import (
 
 // Publisher is a thin wrapper around kafka-go that maintains per-topic writers.
 type Publisher struct {
-	brokers []string
+	client  *Client
 	mu      sync.Mutex
 	writers map[string]*kafka.Writer
 }
 
-func NewPublisher(brokers string) *Publisher {
+func NewPublisher(client *Client) *Publisher {
 	return &Publisher{
-		brokers: strings.Split(brokers, ","),
+		client:  client,
 		writers: make(map[string]*kafka.Writer),
 	}
 }
@@ -33,6 +32,12 @@ func (p *Publisher) Publish(ctx context.Context, ev ports.Event) error {
 	msg := kafka.Message{
 		Key:   ev.Key,
 		Value: ev.Value,
+	}
+	if len(ev.Headers) > 0 {
+		msg.Headers = make([]kafka.Header, 0, len(ev.Headers))
+		for k, v := range ev.Headers {
+			msg.Headers = append(msg.Headers, kafka.Header{Key: k, Value: []byte(v)})
+		}
 	}
 	return w.WriteMessages(ctx, msg)
 }
@@ -51,15 +56,10 @@ func (p *Publisher) getWriter(topic string) *kafka.Writer {
 	if w, ok := p.writers[topic]; ok {
 		return w
 	}
-	if err := ensureTopic(p.brokers, topic, 3); err != nil {
-		log.Printf("[kafka] ensure topic %s failed: %v", topic, err)
-	}
-	w := &kafka.Writer{
-		Addr:         kafka.TCP(p.brokers...),
-		Topic:        topic,
-		Balancer:     &kafka.LeastBytes{},
-		BatchTimeout: 10_000_000, // 10ms
-		RequiredAcks: kafka.RequireOne,
+	w, err := p.client.NewWriter(topic)
+	if err != nil {
+		log.Printf("[kafka] ensure writer for topic %s failed: %v", topic, err)
+		return nil
 	}
 	p.writers[topic] = w
 	return w

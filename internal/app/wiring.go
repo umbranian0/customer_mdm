@@ -41,10 +41,10 @@ func loadConfig() Config {
 		cfg.DB_DSN = "postgres://mdm:mdm@127.0.0.1:6431/mdm?sslmode=disable"
 	}
 	if cfg.KafkaBrokers == "" {
-		cfg.KafkaBrokers = "localhost:9094"
+		cfg.KafkaBrokers = "192.168.210.197:9092"
 	}
 	if cfg.OutboxTopic == "" {
-		cfg.OutboxTopic = "mdm.customer.events.v1"
+		cfg.OutboxTopic = "stricker-customers"
 	}
 	return cfg
 }
@@ -100,7 +100,8 @@ func Initialize(ctx context.Context) *Container {
 	}
 	customerv1.RegisterCustomerServiceServer(srv, custSrv)
 
-	publisher := kafkapub.NewPublisher(cfg.KafkaBrokers)
+	kafkaClient := kafkapub.NewClient(cfg.KafkaBrokers)
+	publisher := kafkapub.NewPublisher(kafkaClient)
 
 	dispatcher := &outbox.Dispatcher{
 		Pool:      pool,
