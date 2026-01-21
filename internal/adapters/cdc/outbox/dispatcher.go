@@ -2,6 +2,7 @@ package outbox
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"time"
 
@@ -22,6 +23,7 @@ type row struct {
 	AggregateID string
 	Payload     []byte
 	EventType   string
+	Headers     map[string]string
 }
 
 func (d *Dispatcher) Run(ctx context.Context) error {
@@ -48,7 +50,7 @@ func (d *Dispatcher) dispatchOnce(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	rows, err := tx.Query(ctx, `SELECT id, aggregate_id, payload, event_type FROM outbox_events WHERE published_at IS NULL ORDER BY occurred_at ASC LIMIT $1 FOR UPDATE SKIP LOCKED`, d.BatchSize)
+	rows, err := tx.Query(ctx, `SELECT id, aggregate_id, payload, event_type, headers FROM outbox_events WHERE published_at IS NULL ORDER BY occurred_at ASC LIMIT $1 FOR UPDATE SKIP LOCKED`, d.BatchSize)
 	if err != nil {
 		_ = tx.Rollback(ctx)
 		return err
@@ -56,10 +58,21 @@ func (d *Dispatcher) dispatchOnce(ctx context.Context) error {
 	var batch []row
 	for rows.Next() {
 		var r row
-		if err := rows.Scan(&r.ID, &r.AggregateID, &r.Payload, &r.EventType); err != nil {
+		var headersBytes []byte
+		if err := rows.Scan(&r.ID, &r.AggregateID, &r.Payload, &r.EventType, &headersBytes); err != nil {
 			rows.Close()
 			_ = tx.Rollback(ctx)
 			return err
+		}
+		if len(headersBytes) > 0 {
+			if err := json.Unmarshal(headersBytes, &r.Headers); err != nil {
+				rows.Close()
+				_ = tx.Rollback(ctx)
+				return err
+			}
+		}
+		if r.Headers == nil {
+			r.Headers = map[string]string{}
 		}
 		batch = append(batch, r)
 	}
@@ -67,9 +80,10 @@ func (d *Dispatcher) dispatchOnce(ctx context.Context) error {
 
 	for _, r := range batch {
 		if err := d.Publisher.Publish(ctx, ports.Event{
-			Topic: d.Topic,
-			Key:   []byte(r.AggregateID),
-			Value: r.Payload,
+			Topic:   d.Topic,
+			Key:     []byte(r.AggregateID),
+			Value:   r.Payload,
+			Headers: r.Headers,
 		}); err != nil {
 			// increment attempts
 			_, _ = tx.Exec(ctx, `UPDATE outbox_events SET attempts=attempts+1 WHERE id=$1`, r.ID)

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	customerv1 "github.com/umbranian0/customer-mdm/api/gen/customer/v1"
+	customerv1 "github.com/umbranian0/customer-mdm/api/gen/api/proto/customer/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -96,10 +96,15 @@ func (g *Gateway) createCustomer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g *Gateway) getCustomer(w http.ResponseWriter, r *http.Request, id string) {
+	code, err := parseID(id)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err)
+		return
+	}
 	ctx, cancel := g.withTimeout(r.Context())
 	defer cancel()
 
-	resp, err := g.Client.GetCustomer(ctx, &customerv1.GetCustomerRequest{Id: id})
+	resp, err := g.Client.GetCustomer(ctx, &customerv1.GetCustomerRequest{Code: code})
 	if err != nil {
 		writeGRPCError(w, err)
 		return
@@ -113,12 +118,17 @@ func (g *Gateway) updateCustomer(w http.ResponseWriter, r *http.Request, id stri
 		writeError(w, http.StatusBadRequest, err)
 		return
 	}
+	code, err := parseID(id)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err)
+		return
+	}
 
 	ctx, cancel := g.withTimeout(r.Context())
 	defer cancel()
 
 	resp, err := g.Client.UpdateCustomer(ctx, &customerv1.UpdateCustomerRequest{
-		Id:    id,
+		Code:  code,
 		Input: toProtoInput(in),
 	})
 	if err != nil {
@@ -129,10 +139,15 @@ func (g *Gateway) updateCustomer(w http.ResponseWriter, r *http.Request, id stri
 }
 
 func (g *Gateway) deleteCustomer(w http.ResponseWriter, r *http.Request, id string) {
+	code, err := parseID(id)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err)
+		return
+	}
 	ctx, cancel := g.withTimeout(r.Context())
 	defer cancel()
 
-	resp, err := g.Client.DeleteCustomer(ctx, &customerv1.DeleteCustomerRequest{Id: id})
+	resp, err := g.Client.DeleteCustomer(ctx, &customerv1.DeleteCustomerRequest{Code: code})
 	if err != nil {
 		writeGRPCError(w, err)
 		return
@@ -192,16 +207,150 @@ func parsePageSize(raw string) int32 {
 	return int32(n)
 }
 
+func parseID(raw string) (int64, error) {
+	id, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil || id <= 0 {
+		return 0, errors.New("invalid customer code")
+	}
+	return id, nil
+}
+
+func toProtoAddressInputs(in []customerAddressInput) []*customerv1.CustomerAddressInput {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make([]*customerv1.CustomerAddressInput, 0, len(in))
+	for _, a := range in {
+		out = append(out, &customerv1.CustomerAddressInput{
+			Id:            a.ID,
+			ErpId:         a.ErpID,
+			AddressCode:   a.AddressCode,
+			Name:          a.Name,
+			Company:       a.Company,
+			Address:       a.Address,
+			PostalCode:    a.PostalCode,
+			City:          a.City,
+			CountryCode:   a.CountryCode,
+			Phone:         a.Phone,
+			Location:      a.Location,
+			StreetType:    a.StreetType,
+			Neighborhood:  a.Neighborhood,
+			State:         a.State,
+			CustomerErpId: a.CustomerErpID,
+			OldErpId:      a.OldErpID,
+			Migrated:      a.Migrated,
+		})
+	}
+	return out
+}
+
+func toProtoTime(t *time.Time) *timestamppb.Timestamp {
+	if t == nil || t.IsZero() {
+		return nil
+	}
+	return timestamppb.New(*t)
+}
+
 func toProtoInput(in customerInput) *customerv1.CustomerInput {
 	return &customerv1.CustomerInput{
-		Name:       in.Name,
-		Email:      in.Email,
-		TaxId:      in.TaxID,
-		Phone:      in.Phone,
-		Country:    in.Country,
-		IsActive:   in.IsActive,
-		Attributes: in.Attributes,
+		FrontendId:                in.FrontendID,
+		ErpId:                     in.ErpID,
+		MarketId:                  in.MarketID,
+		MarketCustomizerId:        in.MarketCustomizerID,
+		Level:                     in.Level,
+		ParentId:                  in.ParentID,
+		DiscountProfile:           in.DiscountProfile,
+		IsActive:                  in.IsActive,
+		CanOrder:                  in.CanOrder,
+		Username:                  in.Username,
+		Password:                  in.Password,
+		Email:                     in.Email,
+		EmailCopy:                 in.EmailCopy,
+		CountryCode:               in.CountryCode,
+		Language:                  in.Language,
+		ContactLanguage:           in.ContactLanguage,
+		WebserviceKey:             in.WebserviceKey,
+		Name:                      in.Name,
+		Company:                   in.Company,
+		TaxId:                     in.TaxID,
+		Bank:                      in.Bank,
+		BankAddress:               in.BankAddress,
+		BankBranch:                in.BankBranch,
+		Website:                   in.Website,
+		AddressLine1:              in.AddressLine1,
+		AddressLine2:              in.AddressLine2,
+		PostalCode:                in.PostalCode,
+		City:                      in.City,
+		Phone:                     in.Phone,
+		AccountManagerName:        in.AccountManagerName,
+		AccountManagerPhone:       in.AccountManagerPhone,
+		AccountManagerEmail:       in.AccountManagerEmail,
+		BirthDate:                 toProtoTime(in.BirthDate),
+		RegisteredAt:              toProtoTime(in.RegisteredAt),
+		LastLoginAt:               toProtoTime(in.LastLoginAt),
+		FavoritesNotifications:    in.FavoritesNotifications,
+		KeyCode:                   in.KeyCode,
+		IsConfirmed:               in.IsConfirmed,
+		RecoveryTimestamp:         toProtoTime(in.RecoveryTimestamp),
+		ReceivesNewsletters:       in.ReceivesNewsletters,
+		StandardTier:              in.StandardTier,
+		OwnerId:                   in.OwnerID,
+		StockPolicy:               in.StockPolicy,
+		Location:                  in.Location,
+		StreetType:                in.StreetType,
+		Neighborhood:              in.Neighborhood,
+		State:                     in.State,
+		StateRegistration:         in.StateRegistration,
+		Country:                   in.Country,
+		Comment:                   in.Comment,
+		RegistrationCertificate:   in.RegistrationCertificate,
+		LastLoginIp:               in.LastLoginIP,
+		LastLoginCountryCode:      in.LastLoginCountryCode,
+		BlockedBySuspiciousChange: in.BlockedBySuspiciousChange,
+		WarehouseCode:             in.WarehouseCode,
+		OldErpId:                  in.OldErpID,
+		CommercialMarketId:        in.CommercialMarketID,
+		Migrated:                  in.Migrated,
+		CommercialAreaId:          in.CommercialAreaID,
+		IndustrialProduction:      in.IndustrialProduction,
+		DeliveryNote:              in.DeliveryNote,
+		NoDirectApprovals:         in.NoDirectApprovals,
+		IsCleaned:                 in.IsCleaned,
+		Addresses:                 toProtoAddressInputs(in.Addresses),
 	}
+}
+
+func toHTTPAddresses(in []*customerv1.CustomerAddress) []customerAddressResponse {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make([]customerAddressResponse, 0, len(in))
+	for _, a := range in {
+		if a == nil {
+			continue
+		}
+		out = append(out, customerAddressResponse{
+			ID:            a.GetId(),
+			CustomerCode:  a.GetCustomerCode(),
+			ErpID:         a.GetErpId(),
+			AddressCode:   a.GetAddressCode(),
+			Name:          a.GetName(),
+			Company:       a.GetCompany(),
+			Address:       a.GetAddress(),
+			PostalCode:    a.GetPostalCode(),
+			City:          a.GetCity(),
+			CountryCode:   a.GetCountryCode(),
+			Phone:         a.GetPhone(),
+			Location:      a.GetLocation(),
+			StreetType:    a.GetStreetType(),
+			Neighborhood:  a.GetNeighborhood(),
+			State:         a.GetState(),
+			CustomerErpID: a.GetCustomerErpId(),
+			OldErpID:      a.GetOldErpId(),
+			Migrated:      a.GetMigrated(),
+		})
+	}
+	return out
 }
 
 func toHTTPResponse(c *customerv1.Customer) customerResponse {
@@ -209,16 +358,73 @@ func toHTTPResponse(c *customerv1.Customer) customerResponse {
 		return customerResponse{}
 	}
 	return customerResponse{
-		ID:         c.GetId(),
-		Name:       c.GetName(),
-		Email:      c.GetEmail(),
-		TaxID:      c.GetTaxId(),
-		Phone:      c.GetPhone(),
-		Country:    c.GetCountry(),
-		IsActive:   c.GetIsActive(),
-		Attributes: c.GetAttributes(),
-		CreatedAt:  toTime(c.GetCreatedAt()),
-		UpdatedAt:  toTime(c.GetUpdatedAt()),
+		Code:                      c.GetCode(),
+		FrontendID:                c.GetFrontendId(),
+		ErpID:                     c.GetErpId(),
+		MarketID:                  c.GetMarketId(),
+		MarketCustomizerID:        c.GetMarketCustomizerId(),
+		Level:                     c.GetLevel(),
+		ParentID:                  c.GetParentId(),
+		DiscountProfile:           c.GetDiscountProfile(),
+		IsActive:                  c.GetIsActive(),
+		CanOrder:                  c.GetCanOrder(),
+		Username:                  c.GetUsername(),
+		Password:                  c.GetPassword(),
+		Email:                     c.GetEmail(),
+		EmailCopy:                 c.GetEmailCopy(),
+		CountryCode:               c.GetCountryCode(),
+		Language:                  c.GetLanguage(),
+		ContactLanguage:           c.GetContactLanguage(),
+		WebserviceKey:             c.GetWebserviceKey(),
+		Name:                      c.GetName(),
+		Company:                   c.GetCompany(),
+		TaxID:                     c.GetTaxId(),
+		Bank:                      c.GetBank(),
+		BankAddress:               c.GetBankAddress(),
+		BankBranch:                c.GetBankBranch(),
+		Website:                   c.GetWebsite(),
+		AddressLine1:              c.GetAddressLine1(),
+		AddressLine2:              c.GetAddressLine2(),
+		PostalCode:                c.GetPostalCode(),
+		City:                      c.GetCity(),
+		Phone:                     c.GetPhone(),
+		AccountManagerName:        c.GetAccountManagerName(),
+		AccountManagerPhone:       c.GetAccountManagerPhone(),
+		AccountManagerEmail:       c.GetAccountManagerEmail(),
+		BirthDate:                 toTimePtr(c.GetBirthDate()),
+		RegisteredAt:              toTimePtr(c.GetRegisteredAt()),
+		LastLoginAt:               toTimePtr(c.GetLastLoginAt()),
+		FavoritesNotifications:    c.GetFavoritesNotifications(),
+		KeyCode:                   c.GetKeyCode(),
+		IsConfirmed:               c.GetIsConfirmed(),
+		RecoveryTimestamp:         toTimePtr(c.GetRecoveryTimestamp()),
+		ReceivesNewsletters:       c.GetReceivesNewsletters(),
+		StandardTier:              c.GetStandardTier(),
+		OwnerID:                   c.GetOwnerId(),
+		StockPolicy:               c.GetStockPolicy(),
+		Location:                  c.GetLocation(),
+		StreetType:                c.GetStreetType(),
+		Neighborhood:              c.GetNeighborhood(),
+		State:                     c.GetState(),
+		StateRegistration:         c.GetStateRegistration(),
+		Country:                   c.GetCountry(),
+		Comment:                   c.GetComment(),
+		RegistrationCertificate:   c.GetRegistrationCertificate(),
+		LastLoginIP:               c.GetLastLoginIp(),
+		LastLoginCountryCode:      c.GetLastLoginCountryCode(),
+		BlockedBySuspiciousChange: c.GetBlockedBySuspiciousChange(),
+		WarehouseCode:             c.GetWarehouseCode(),
+		OldErpID:                  c.GetOldErpId(),
+		CommercialMarketID:        c.GetCommercialMarketId(),
+		Migrated:                  c.GetMigrated(),
+		CommercialAreaID:          c.GetCommercialAreaId(),
+		IndustrialProduction:      c.GetIndustrialProduction(),
+		DeliveryNote:              c.GetDeliveryNote(),
+		NoDirectApprovals:         c.GetNoDirectApprovals(),
+		IsCleaned:                 c.GetIsCleaned(),
+		Addresses:                 toHTTPAddresses(c.GetAddresses()),
+		CreatedAt:                 toTime(c.GetCreatedAt()),
+		UpdatedAt:                 toTime(c.GetUpdatedAt()),
 	}
 }
 
@@ -227,6 +433,14 @@ func toTime(ts *timestamppb.Timestamp) time.Time {
 		return time.Time{}
 	}
 	return ts.AsTime()
+}
+
+func toTimePtr(ts *timestamppb.Timestamp) *time.Time {
+	if ts == nil {
+		return nil
+	}
+	t := ts.AsTime()
+	return &t
 }
 
 func writeJSON(w http.ResponseWriter, statusCode int, payload interface{}) {

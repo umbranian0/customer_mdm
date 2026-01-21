@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	customerv1 "github.com/umbranian0/customer-mdm/api/gen/customer/v1"
+	customerv1 "github.com/umbranian0/customer-mdm/api/gen/api/proto/customer/v1"
 	"github.com/umbranian0/customer-mdm/internal/adapters/transport/rest"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

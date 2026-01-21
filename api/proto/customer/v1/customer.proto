@@ -5,27 +5,182 @@ option go_package = "github.com/umbranian0/customer-mdm/api/gen/api/proto/custom
 
 import "google/protobuf/timestamp.proto";
 
+message CustomerAddress {
+  int64 id = 1;
+  int64 customer_code = 2;
+  string erp_id = 3;
+  string address_code = 4;
+  string name = 5;
+  string company = 6;
+  string address = 7;
+  string postal_code = 8;
+  string city = 9;
+  string country_code = 10;
+  string phone = 11;
+  string location = 12;
+  string street_type = 13;
+  string neighborhood = 14;
+  string state = 15;
+  string customer_erp_id = 16;
+  string old_erp_id = 17;
+  bool migrated = 18;
+}
+
+message CustomerAddressInput {
+  int64 id = 1;
+  string erp_id = 2;
+  string address_code = 3;
+  string name = 4;
+  string company = 5;
+  string address = 6;
+  string postal_code = 7;
+  string city = 8;
+  string country_code = 9;
+  string phone = 10;
+  string location = 11;
+  string street_type = 12;
+  string neighborhood = 13;
+  string state = 14;
+  string customer_erp_id = 15;
+  string old_erp_id = 16;
+  bool migrated = 17;
+}
+
 message Customer {
-  string id = 1;
-  string name = 2;
-  string email = 3;
-  string tax_id = 4;
-  string phone = 5;
-  string country = 6;
-  bool   is_active = 7;
-  map<string,string> attributes = 8;
-  google.protobuf.Timestamp created_at = 9;
-  google.protobuf.Timestamp updated_at = 10;
+  int64 code = 1;
+  int64 frontend_id = 2;
+  string erp_id = 3;
+  int64 market_id = 4;
+  int64 market_customizer_id = 5;
+  int32 level = 6;
+  int64 parent_id = 7;
+  string discount_profile = 8;
+  bool is_active = 9;
+  bool can_order = 10;
+  string username = 11;
+  string password = 12;
+  string email = 13;
+  string email_copy = 14;
+  string country_code = 15;
+  string language = 16;
+  string contact_language = 17;
+  string webservice_key = 18;
+  string name = 19;
+  string company = 20;
+  string tax_id = 21;
+  string bank = 22;
+  string bank_address = 23;
+  string bank_branch = 24;
+  string website = 25;
+  string address_line1 = 26;
+  string address_line2 = 27;
+  string postal_code = 28;
+  string city = 29;
+  string phone = 30;
+  string account_manager_name = 31;
+  string account_manager_phone = 32;
+  string account_manager_email = 33;
+  google.protobuf.Timestamp birth_date = 34;
+  google.protobuf.Timestamp registered_at = 35;
+  google.protobuf.Timestamp last_login_at = 36;
+  bool favorites_notifications = 37;
+  int32 key_code = 38;
+  bool is_confirmed = 39;
+  google.protobuf.Timestamp recovery_timestamp = 40;
+  bool receives_newsletters = 41;
+  int32 standard_tier = 42;
+  string owner_id = 43;
+  int32 stock_policy = 44;
+  string location = 45;
+  string street_type = 46;
+  string neighborhood = 47;
+  string state = 48;
+  string state_registration = 49;
+  string country = 50;
+  string comment = 51;
+  string registration_certificate = 52;
+  string last_login_ip = 53;
+  string last_login_country_code = 54;
+  bool blocked_by_suspicious_change = 55;
+  string warehouse_code = 56;
+  string old_erp_id = 57;
+  int64 commercial_market_id = 58;
+  bool migrated = 59;
+  string commercial_area_id = 60;
+  int32 industrial_production = 61;
+  string delivery_note = 62;
+  bool no_direct_approvals = 63;
+  bool is_cleaned = 64;
+  repeated CustomerAddress addresses = 65;
+  google.protobuf.Timestamp created_at = 66;
+  google.protobuf.Timestamp updated_at = 67;
 }
 
 message CustomerInput {
-  string name = 1;
-  string email = 2;
-  string tax_id = 3;
-  string phone = 4;
-  string country = 5;
-  bool   is_active = 6;
-  map<string,string> attributes = 7;
+  int64 frontend_id = 1;
+  string erp_id = 2;
+  int64 market_id = 3;
+  int64 market_customizer_id = 4;
+  int32 level = 5;
+  int64 parent_id = 6;
+  string discount_profile = 7;
+  bool is_active = 8;
+  bool can_order = 9;
+  string username = 10;
+  string password = 11;
+  string email = 12;
+  string email_copy = 13;
+  string country_code = 14;
+  string language = 15;
+  string contact_language = 16;
+  string webservice_key = 17;
+  string name = 18;
+  string company = 19;
+  string tax_id = 20;
+  string bank = 21;
+  string bank_address = 22;
+  string bank_branch = 23;
+  string website = 24;
+  string address_line1 = 25;
+  string address_line2 = 26;
+  string postal_code = 27;
+  string city = 28;
+  string phone = 29;
+  string account_manager_name = 30;
+  string account_manager_phone = 31;
+  string account_manager_email = 32;
+  google.protobuf.Timestamp birth_date = 33;
+  google.protobuf.Timestamp registered_at = 34;
+  google.protobuf.Timestamp last_login_at = 35;
+  bool favorites_notifications = 36;
+  int32 key_code = 37;
+  bool is_confirmed = 38;
+  google.protobuf.Timestamp recovery_timestamp = 39;
+  bool receives_newsletters = 40;
+  int32 standard_tier = 41;
+  string owner_id = 42;
+  int32 stock_policy = 43;
+  string location = 44;
+  string street_type = 45;
+  string neighborhood = 46;
+  string state = 47;
+  string state_registration = 48;
+  string country = 49;
+  string comment = 50;
+  string registration_certificate = 51;
+  string last_login_ip = 52;
+  string last_login_country_code = 53;
+  bool blocked_by_suspicious_change = 54;
+  string warehouse_code = 55;
+  string old_erp_id = 56;
+  int64 commercial_market_id = 57;
+  bool migrated = 58;
+  string commercial_area_id = 59;
+  int32 industrial_production = 60;
+  string delivery_note = 61;
+  bool no_direct_approvals = 62;
+  bool is_cleaned = 63;
+  repeated CustomerAddressInput addresses = 64;
 }
 
 message PageRequest {
@@ -44,16 +199,16 @@ message CreateCustomerRequest {
 }
 message CreateCustomerResponse { Customer customer = 1; }
 
-message GetCustomerRequest { string id = 1; }
+message GetCustomerRequest { int64 code = 1; }
 message GetCustomerResponse { Customer customer = 1; }
 
 message UpdateCustomerRequest {
-  string id = 1;
+  int64 code = 1;
   CustomerInput input = 2;
 }
 message UpdateCustomerResponse { Customer customer = 1; }
 
-message DeleteCustomerRequest { string id = 1; }
+message DeleteCustomerRequest { int64 code = 1; }
 message DeleteCustomerResponse { bool deleted = 1; }
 
 message ListCustomersRequest { PageRequest page = 1; }

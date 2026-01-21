@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 
-	customerv1 "github.com/umbranian0/customer-mdm/api/gen/customer/v1"
+	customerv1 "github.com/umbranian0/customer-mdm/api/gen/api/proto/customer/v1"
 	outbox "github.com/umbranian0/customer-mdm/internal/adapters/cdc/outbox"
 	pg "github.com/umbranian0/customer-mdm/internal/adapters/db/postgres"
 	kafkapub "github.com/umbranian0/customer-mdm/internal/adapters/stream/kafka"
